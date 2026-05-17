@@ -1,0 +1,21 @@
+# Local/editor files
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Do not accidentally publish private materials
+private/
+restricted/
+proofs/
+demo/
+notebooks/
+notebooklm/
+investor/
+internal/
+runtime/
+implementation/
+*.secret
+*.key
+*.pem
+.env
