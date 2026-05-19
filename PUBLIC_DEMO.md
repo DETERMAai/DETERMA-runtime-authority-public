@@ -1,49 +1,49 @@
-# Public Demo Concept
+# Public Demo
 
-## Purpose
+## The Problem
 
-This public demo is intentionally conceptual.
+An AI system receives approval to perform a mutation.
 
-It is designed to explain the problem without exposing implementation-sensitive enforcement mechanics.
+Before execution occurs, runtime conditions change.
 
-## Scenario
+Most systems still execute because approval exists.
 
-An AI system proposes a change to a code repository.
+DETERMA asks a stricter question:
 
-At approval time, the change appears acceptable.
+> Is this exact execution still legitimate right now?
 
-Before execution, the runtime environment changes.
+---
 
-A traditional approval-only system may still execute the previously approved change.
+## Demo Flow
 
-A runtime authority system should ask a stricter question:
+```text
+AI proposes mutation
+-> human approval issued
+-> runtime state changes
+-> execution attempts release
+-> legitimacy recomputed
+-> execution denied
+-> replay denied
+-> append-only audit preserved
+```
 
-> Is this exact execution still legitimate under the current state?
+---
 
-## Public-safe flow
+## What The Demo Proves
 
-1. AI proposes a patch.
-2. Human approval is requested.
-3. The system records the approval.
-4. Runtime state changes.
-5. Execution is re-evaluated.
-6. If the state no longer matches the approved context, execution halts.
-7. Evidence records the decision.
+The demo demonstrates one runtime invariant:
 
-## What this demonstrates
+> Historical approval alone is insufficient execution authority.
 
-The public demo demonstrates the category:
+---
 
-> Historical approval is not always sufficient execution authority.
+## What Is Intentionally Not Public
 
-## What this does not expose
+The public demo does not expose:
 
-This public demo does not expose:
-- proof scripts
-- witness generation
-- execution release mechanics
-- replay invalidation logic
-- audit-chain internals
-- implementation-bearing runtime semantics
-
-For technical review, request private access.
+- enforcement internals
+- release mechanics
+- replay invalidation internals
+- witness generation semantics
+- constitutional kernel mechanics
+- implementation-bearing runtime code
