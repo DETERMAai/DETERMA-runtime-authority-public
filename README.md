@@ -49,9 +49,13 @@ Audit preserved.
 
 ---
 
-## Runtime Sequence
+## Runtime Concepts
 
+- [Why approval is insufficient](docs/runtime/why-approval-is-insufficient.md)
+- [Runtime legitimacy](docs/runtime/runtime-legitimacy.md)
 - [Runtime legitimacy sequence](docs/runtime/runtime-sequence.md)
+- [Mutation commit integrity](docs/runtime/mutation-commit-integrity.md)
+- [Runtime drift failures](docs/runtime/runtime-drift-failures.md)
 
 ---
 
