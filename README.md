@@ -49,20 +49,22 @@ Audit preserved.
 
 ---
 
-## Public Materials
+## Runtime Sequence
 
-### Runtime
+- [Runtime legitimacy sequence](docs/runtime/runtime-sequence.md)
 
-- [Runtime legitimacy](docs/runtime/runtime-legitimacy.md)
-- [Runtime drift failures](docs/runtime/runtime-drift-failures.md)
+---
 
-### Examples
+## Runtime Failure Examples
 
 - [Stale approval](docs/examples/stale-approval.md)
 - [Replay authority](docs/examples/replay-authority.md)
 - [Topology drift](docs/examples/topology-drift.md)
+- [CI/CD runtime drift](docs/examples/ci-cd-runtime-drift.md)
 
-### Demo
+---
+
+## Public Demo
 
 - [Canonical MVP demo](docs/mvp/canonical-demo.md)
 - [Public demo](PUBLIC_DEMO.md)
