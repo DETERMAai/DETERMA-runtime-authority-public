@@ -51,7 +51,7 @@ flowchart TB
 
     F{Execution-time outcome}
     G[ALLOW]
-    H[NEEDS REVIEW]
+    H[NEEDS_REVIEW]
     I[DENY]
     J[Execute through the existing system]
     K[Route to an accountable reviewer]
