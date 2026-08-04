@@ -51,7 +51,7 @@ flowchart TB
 
     F{Execution-time outcome}
     G[ALLOW]
-    H[REQUIRES REVALIDATION]
+    H[NEEDS REVIEW]
     I[DENY]
     J[Execute through the existing system]
     K[Route to an accountable reviewer]
@@ -81,7 +81,8 @@ flowchart TB
 2. DETERMA normalizes the proposed action and the supporting evidence into an action-level decision context.
 3. Material evidence is resolved again at the execution checkpoint.
 4. The output is deterministic, explainable and accompanied by a receipt.
-5. Execution still occurs through the existing enterprise system or a separately governed executor.
+5. `NEEDS_REVIEW` is the canonical reviewer-routing outcome; it does not authorize execution.
+6. Execution still occurs through the existing enterprise system or a separately governed executor.
 
 ## Core Runtime Failure
 
@@ -108,7 +109,7 @@ proposal
 -> runtime drift window
 -> evidence and live-state resolution
 -> legitimacy recomputation
--> allow, revalidate or deny
+-> ALLOW, NEEDS_REVIEW or DENY
 -> reason-coded receipt
 ```
 
