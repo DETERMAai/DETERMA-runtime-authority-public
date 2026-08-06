@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.ai/research/category-validation/benchmark_case_schema.json",
+  "title": "State Reconstruction Tax Minimal Benchmark Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "workload_family",
+    "intent",
+    "initial_state",
+    "drift_event",
+    "expected_decision_before_drift",
+    "expected_decision_after_drift",
+    "required_evidence",
+    "safety_notes",
+    "attribution_notes"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "pattern": "^SRT-[A-Z]+-[0-9]{3}$"
+    },
+    "workload_family": {
+      "type": "string",
+      "enum": [
+        "pr_merge",
+        "code_mutation",
+        "deployment_gate",
+        "crm_mutation",
+        "document_update",
+        "multi_agent_review"
+      ]
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["action", "resource", "subject", "delegated_by"],
+      "properties": {
+        "action": {"type": "string"},
+        "resource": {"type": "string"},
+        "subject": {"type": "string"},
+        "delegated_by": {"type": "string"}
+      }
+    },
+    "initial_state": {
+      "type": "object",
+      "additionalProperties": true,
+      "minProperties": 1
+    },
+    "drift_event": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["type", "time"],
+      "properties": {
+        "type": {"type": "string"},
+        "time": {"type": "string"}
+      }
+    },
+    "expected_decision_before_drift": {
+      "type": "string",
+      "enum": ["ALLOW", "DENY", "ESCALATE", "REQUIRE_FRESH_RECONSTRUCTION"]
+    },
+    "expected_decision_after_drift": {
+      "type": "string",
+      "enum": ["ALLOW", "DENY", "ESCALATE", "REQUIRE_FRESH_RECONSTRUCTION"]
+    },
+    "required_evidence": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "safety_notes": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "attribution_notes": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}
