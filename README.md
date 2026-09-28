@@ -128,6 +128,16 @@ proposal
 - [Topology drift](docs/examples/topology-drift.md)
 - [CI/CD runtime drift](docs/examples/ci-cd-runtime-drift.md)
 
+## Public Approval Continuity Benchmark
+
+**Live benchmark:** https://determaai.github.io/DETERMA-runtime-authority-public/docs/benchmark/
+
+DETERMA analyzed 200 independently inspectable GitHub PR approval histories across 10 preselected agentic repositories. In this benchmark corpus, 30 histories (15%) ended with a final/current PR head different from the exact commit bound to the latest captured approval.
+
+Interpretation: HEAD_CHANGED_AFTER_LATEST_APPROVAL → REVALIDATE_EXACT_HEAD_BEFORE_EXECUTION.
+
+This is an approval-continuity signal, not a vulnerability or population-wide prevalence claim.
+
 ## Public Demo
 
 - [Canonical MVP demo](docs/mvp/canonical-demo.md)
