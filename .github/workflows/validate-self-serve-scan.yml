@@ -1,0 +1,22 @@
+name: Validate self-serve scan
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/scan_requested_repo.py'
+      - 'scripts/test_scan_requested_repo.py'
+      - '.github/workflows/self-serve-scan.yml'
+      - '.github/workflows/validate-self-serve-scan.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile scanner
+        run: python3 -m py_compile scripts/scan_requested_repo.py
+      - name: Run fail-closed parser tests
+        run: python3 scripts/test_scan_requested_repo.py -v
