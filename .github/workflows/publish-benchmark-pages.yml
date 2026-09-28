@@ -1,6 +1,11 @@
 name: Publish benchmark pages
 
 on:
+  pull_request:
+    paths:
+      - 'docs/benchmark/**'
+      - 'data/approval-continuity-benchmark-v3-200.json'
+      - '.github/workflows/publish-benchmark-pages.yml'
   push:
     branches: [main]
     paths:
