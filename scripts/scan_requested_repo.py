@@ -5,6 +5,17 @@ from pathlib import Path
 REPO_RE = re.compile(r'^https://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+?)/?$')
 AUTH_TEXT = 'I am authorized to submit this repository or workflow for analysis.'
 
+def authenticated_gh_api(path):
+    p = subprocess.run(['gh','api',path], text=True, capture_output=True)
+    if p.returncode != 0:
+        raise RuntimeError((p.stderr or p.stdout).strip() or f'gh api failed: {path}')
+    return json.loads(p.stdout)
+
+def api_json(path):
+    if os.getenv('DETERMA_SCAN_TRANSPORT') == 'authenticated-gh':
+        return authenticated_gh_api(path)
+    return public_api(path)
+
 def public_api(path):
     url = 'https://api.github.com/' + path
     req = urllib.request.Request(url, headers={
@@ -41,7 +52,7 @@ def parse_issue(event_path):
     }
 
 def scan(repo_full_name, limit=10):
-    meta=public_api(f'repos/{repo_full_name}')
+    meta=api_json(f'repos/{repo_full_name}')
     if meta.get('private') is True:
         raise ValueError('PRIVATE_REPOSITORY_NOT_ALLOWED_IN_AUTOMATED_SCAN')
     if meta.get('archived'):
@@ -50,14 +61,14 @@ def scan(repo_full_name, limit=10):
         archived=False
 
     q=f'repo:{repo_full_name} is:pr review:approved updated:>=2026-01-01'
-    sr=public_api('search/issues?q='+urllib.parse.quote(q,safe='')+f'&sort=updated&order=desc&per_page={limit}')
+    sr=api_json('search/issues?q='+urllib.parse.quote(q,safe='')+f'&sort=updated&order=desc&per_page={limit}')
     items=sr.get('items',[])[:limit]
     rows=[]
     skipped=[]
     for item in items:
         n=item['number']
-        pr=public_api(f'repos/{repo_full_name}/pulls/{n}')
-        rv=public_api(f'repos/{repo_full_name}/pulls/{n}/reviews?per_page=100')
+        pr=api_json(f'repos/{repo_full_name}/pulls/{n}')
+        rv=api_json(f'repos/{repo_full_name}/pulls/{n}/reviews?per_page=100')
         approvals=[x for x in rv if x.get('state')=='APPROVED' and x.get('commit_id') and x.get('submitted_at')]
         if not approvals:
             skipped.append({'pr':n,'reason':'NO_RETRIEVABLE_APPROVED_REVIEW'})

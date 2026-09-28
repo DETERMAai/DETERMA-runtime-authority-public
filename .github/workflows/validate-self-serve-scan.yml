@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/scan_requested_repo.py'
       - 'scripts/test_scan_requested_repo.py'
+      - 'scripts/process_scan_queue.py'
       - '.github/workflows/self-serve-scan.yml'
       - '.github/workflows/validate-self-serve-scan.yml'
 
@@ -16,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Compile scanner
-        run: python3 -m py_compile scripts/scan_requested_repo.py
+      - name: Compile scanner and queue worker
+        run: python3 -m py_compile scripts/scan_requested_repo.py scripts/process_scan_queue.py
       - name: Run fail-closed parser tests
         run: python3 scripts/test_scan_requested_repo.py -v
