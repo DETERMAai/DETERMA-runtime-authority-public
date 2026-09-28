@@ -5,6 +5,9 @@ on:
     paths:
       - 'docs/benchmark/**'
       - 'data/approval-continuity-benchmark-v3-200.json'
+      - 'data/approval-continuity-benchmark-v4-enriched-30.json'
+      - 'data/approval-continuity-benchmark-v4-materiality-labeling.csv'
+      - 'scripts/enrich_benchmark_v4.py'
       - '.github/workflows/publish-benchmark-pages.yml'
       - 'README.md'
       - 'index.html'
@@ -13,6 +16,9 @@ on:
     paths:
       - 'docs/benchmark/**'
       - 'data/approval-continuity-benchmark-v3-200.json'
+      - 'data/approval-continuity-benchmark-v4-enriched-30.json'
+      - 'data/approval-continuity-benchmark-v4-materiality-labeling.csv'
+      - 'scripts/enrich_benchmark_v4.py'
       - '.github/workflows/publish-benchmark-pages.yml'
       - 'README.md'
       - 'index.html'
@@ -38,19 +44,39 @@ jobs:
       - name: Validate benchmark dataset and HTML
         run: |
           python - <<'PY'
+          import csv
           import json
+          import py_compile
           from html.parser import HTMLParser
 
           class P(HTMLParser):
               pass
 
           P().feed(open('docs/benchmark/index.html', encoding='utf-8').read())
-          data = json.load(open('data/approval-continuity-benchmark-v3-200.json', encoding='utf-8'))
-          assert len(data['cases']) == 200
-          assert sum(bool(x['head_changed_after_latest_approval']) for x in data['cases']) == 30
-          assert sum(x['approval']['actor_class'] == 'HUMAN_OR_NONBOT' for x in data['cases']) == 170
-          assert sum(x['approval']['actor_class'] == 'BOT' for x in data['cases']) == 30
-          print('BENCHMARK_VALIDATION=PASS')
+          v3 = json.load(open('data/approval-continuity-benchmark-v3-200.json', encoding='utf-8'))
+          v4 = json.load(open('data/approval-continuity-benchmark-v4-enriched-30.json', encoding='utf-8'))
+          labels = list(csv.DictReader(open('data/approval-continuity-benchmark-v4-materiality-labeling.csv', encoding='utf-8')))
+          py_compile.compile('scripts/enrich_benchmark_v4.py', doraise=True)
+
+          assert len(v3['cases']) == 200
+          assert sum(bool(x['head_changed_after_latest_approval']) for x in v3['cases']) == 30
+          assert sum(x['approval']['actor_class'] == 'HUMAN_OR_NONBOT' for x in v3['cases']) == 170
+          assert sum(x['approval']['actor_class'] == 'BOT' for x in v3['cases']) == 30
+
+          assert v4['signal_name'] == 'APPROVAL_COMMIT_DIFFERS_FROM_CAPTURED_FINAL_OR_CURRENT_HEAD'
+          assert len(v4['changed_cases']) == 30
+          assert v4['summary']['different_git_tree'] == 29
+          assert v4['summary']['same_git_tree_different_commit_id'] == 1
+          assert v4['summary']['direct_descendant_relation'] == 26
+          assert v4['summary']['direct_descendant_with_content_change'] == 25
+          assert v4['summary']['diverged_history_with_content_change'] == 3
+          assert v4['summary']['captured_head_behind_approval_commit'] == 1
+          assert v4['summary']['captured_approval_review_current_state_approved'] == 30
+          assert len(labels) == 29
+          assert all(not row['reviewer_1_label'] and not row['reviewer_2_label'] for row in labels)
+
+          print('BENCHMARK_V3_VALIDATION=PASS')
+          print('BENCHMARK_V4_VALIDATION=PASS')
           PY
 
   deploy:
