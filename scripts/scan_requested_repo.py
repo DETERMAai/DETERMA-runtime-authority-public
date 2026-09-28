@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
-import argparse, json, os, re, subprocess, sys, urllib.parse
+import argparse, json, os, re, subprocess, sys, urllib.parse, urllib.request, urllib.error
 from pathlib import Path
 
 REPO_RE = re.compile(r'^https://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+?)/?$')
 AUTH_TEXT = 'I am authorized to submit this repository or workflow for analysis.'
 
-def gh(path):
-    p = subprocess.run(['gh','api',path], text=True, capture_output=True)
-    if p.returncode != 0:
-        raise RuntimeError((p.stderr or p.stdout).strip() or f'gh api failed: {path}')
-    return json.loads(p.stdout)
+def public_api(path):
+    url = 'https://api.github.com/' + path
+    req = urllib.request.Request(url, headers={
+        'User-Agent': 'DETERMA-public-approval-scan-v1',
+        'Accept': 'application/vnd.github+json'
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            return json.loads(resp.read().decode('utf-8'))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode('utf-8', errors='replace')
+        raise RuntimeError(f'PUBLIC_GITHUB_API_{e.code}:{path}:{body[:240]}')
 
 def extract_section(body, heading):
     marker = f'### {heading}'
@@ -33,8 +40,8 @@ def parse_issue(event_path):
       'authorized':authorized
     }
 
-def scan(repo_full_name, limit=20):
-    meta=gh(f'repos/{repo_full_name}')
+def scan(repo_full_name, limit=10):
+    meta=public_api(f'repos/{repo_full_name}')
     if meta.get('private') is True:
         raise ValueError('PRIVATE_REPOSITORY_NOT_ALLOWED_IN_AUTOMATED_SCAN')
     if meta.get('archived'):
@@ -43,14 +50,14 @@ def scan(repo_full_name, limit=20):
         archived=False
 
     q=f'repo:{repo_full_name} is:pr review:approved updated:>=2026-01-01'
-    sr=gh('search/issues?q='+urllib.parse.quote(q,safe='')+f'&sort=updated&order=desc&per_page={limit}')
+    sr=public_api('search/issues?q='+urllib.parse.quote(q,safe='')+f'&sort=updated&order=desc&per_page={limit}')
     items=sr.get('items',[])[:limit]
     rows=[]
     skipped=[]
     for item in items:
         n=item['number']
-        pr=gh(f'repos/{repo_full_name}/pulls/{n}')
-        rv=gh(f'repos/{repo_full_name}/pulls/{n}/reviews?per_page=100')
+        pr=public_api(f'repos/{repo_full_name}/pulls/{n}')
+        rv=public_api(f'repos/{repo_full_name}/pulls/{n}/reviews?per_page=100')
         approvals=[x for x in rv if x.get('state')=='APPROVED' and x.get('commit_id') and x.get('submitted_at')]
         if not approvals:
             skipped.append({'pr':n,'reason':'NO_RETRIEVABLE_APPROVED_REVIEW'})
@@ -75,6 +82,7 @@ def scan(repo_full_name, limit=20):
       'archived':archived,
       'query':q,
       'search_hits_considered':len(items),
+      'scan_limit':limit,
       'valid_cases':len(rows),
       'head_changed_after_latest_approval':sum(x['head_changed_after_latest_approval'] for x in rows),
       'cases':rows,
