@@ -1,0 +1,67 @@
+name: Publish benchmark pages
+
+on:
+  pull_request:
+    paths:
+      - 'docs/benchmark/**'
+      - 'data/approval-continuity-benchmark-v3-200.json'
+      - '.github/workflows/publish-benchmark-pages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/benchmark/**'
+      - 'data/approval-continuity-benchmark-v3-200.json'
+      - '.github/workflows/publish-benchmark-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate benchmark dataset and HTML
+        run: |
+          python - <<'PY'
+          import json
+          from html.parser import HTMLParser
+
+          class P(HTMLParser):
+              pass
+
+          P().feed(open('docs/benchmark/index.html', encoding='utf-8').read())
+          data = json.load(open('data/approval-continuity-benchmark-v3-200.json', encoding='utf-8'))
+          assert len(data['cases']) == 200
+          assert sum(bool(x['head_changed_after_latest_approval']) for x in data['cases']) == 30
+          assert sum(x['approval']['actor_class'] == 'HUMAN_OR_NONBOT' for x in data['cases']) == 170
+          assert sum(x['approval']['actor_class'] == 'BOT' for x in data['cases']) == 30
+          print('BENCHMARK_VALIDATION=PASS')
+          PY
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: validate
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

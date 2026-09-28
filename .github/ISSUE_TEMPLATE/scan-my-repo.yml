@@ -1,0 +1,44 @@
+name: Scan my repo
+description: Request a bounded DETERMA approval-continuity scan for a public or explicitly authorized repository.
+title: "[SCAN] "
+labels: ["scan-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Request a bounded DETERMA scan. Please share only repositories and data you are authorized to provide.
+
+  - type: input
+    id: repository
+    attributes:
+      label: Repository URL
+      description: Public GitHub repository, or a repository you are explicitly authorized to submit.
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Preferred mode
+      options:
+        - Public historical scan
+        - Private design-partner review
+        - Shadow pilot discussion
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: What do you want DETERMA to test?
+      description: Example — stale approval, changed head, changed target state, retry/replay ambiguity.
+      placeholder: One or two sentences is enough.
+
+  - type: checkboxes
+    id: authority
+    attributes:
+      label: Authorization
+      options:
+        - label: I am authorized to submit this repository or workflow for analysis.
+          required: true

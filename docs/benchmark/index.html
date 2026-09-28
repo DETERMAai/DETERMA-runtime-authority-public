@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DETERMA — Approval Continuity Benchmark</title>
+<meta name="description" content="A reproducible 200-case benchmark of approval-to-final-head continuity across agentic open-source projects." />
+<style>
+:root{--bg:#07110d;--panel:#0d1c16;--text:#e9fff4;--muted:#9cc5ae;--line:#224534;--accent:#70f0a7;--warn:#ffd166;--danger:#ff8b8b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#123224 0,#07110d 42%);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:1120px;margin:auto;padding:48px 20px 72px}.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+h1{font-size:clamp(36px,6vw,72px);line-height:.98;margin:14px 0 20px;max-width:900px}.lede{font-size:clamp(18px,2.2vw,24px);color:var(--muted);max-width:820px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:32px 0}.card,.case{background:rgba(13,28,22,.86);border:1px solid var(--line);border-radius:18px;padding:20px}.metric{font-size:36px;font-weight:800}.label{color:var(--muted);font-size:14px}
+section{margin-top:46px}h2{font-size:30px;margin-bottom:10px}.boundary{border-left:4px solid var(--warn);padding:14px 18px;background:#1c1a0d;border-radius:10px;color:#f7e7aa}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.controls input,.controls select{background:#0a1712;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.case{margin:10px 0}.caseTop{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}.repo{font-weight:800}.pill{display:inline-block;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px}.changed{color:var(--danger)}.same{color:var(--accent)}
+code{color:#c8ffe0;word-break:break-all}.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.btn{display:inline-block;padding:13px 18px;border-radius:12px;text-decoration:none;font-weight:800;background:var(--accent);color:#04220f}.btn.secondary{background:transparent;color:var(--text);border:1px solid var(--line)}
+small{color:var(--muted)}a{color:#9fffc4}
+@media(max-width:820px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">DETERMA • Same Action. Changed World.</div>
+<h1>Was the code that got approved still the code at the end?</h1>
+<p class="lede">DETERMA analyzed 200 independently inspectable approval histories across 10 agentic open-source repositories. The benchmark asks one narrow question: did the final/current PR head differ from the exact commit bound to the latest captured approval?</p>
+
+<div class="grid">
+  <div class="card"><div class="metric">200</div><div class="label">approval histories</div></div>
+  <div class="card"><div class="metric">30</div><div class="label">head changed after latest approval</div></div>
+  <div class="card"><div class="metric">15.0%</div><div class="label">descriptive rate in this corpus</div></div>
+  <div class="card"><div class="metric">10</div><div class="label">preselected agentic repositories</div></div>
+</div>
+
+<section>
+<h2>The DETERMA decision</h2>
+<div class="card">
+<p><strong>HEAD_CHANGED_AFTER_LATEST_APPROVAL</strong></p>
+<p>The exact commit that received the latest captured approval is not the final/current PR head.</p>
+<p><strong>Model action:</strong> <code>REVALIDATE_EXACT_HEAD_BEFORE_EXECUTION</code></p>
+</div>
+<p class="boundary"><strong>Truth boundary:</strong> this is an approval-continuity signal, not a vulnerability finding. It does not claim exploitability, policy violation, or that upstream controls were bypassed.</p>
+</section>
+
+<section>
+<h2>Explore the 200 cases</h2>
+<p><small>All source records point to public GitHub histories. Human/non-bot and bot approvals are separated in the source dataset.</small></p>
+<div class="controls">
+<input id="q" placeholder="Filter repository or PR…" />
+<select id="status">
+<option value="all">All cases</option>
+<option value="changed">Head changed after approval</option>
+<option value="same">Head unchanged</option>
+</select>
+<select id="actor">
+<option value="all">All approval actors</option>
+<option value="HUMAN_OR_NONBOT">Human / non-bot</option>
+<option value="BOT">Bot</option>
+</select>
+</div>
+<div id="cases">Loading benchmark…</div>
+</section>
+
+<section>
+<h2>Try it on your repo</h2>
+<p class="lede">Give DETERMA one public or explicitly authorized repository. Start with a bounded historical scan before any production integration.</p>
+<div class="cta">
+<a class="btn" href="https://github.com/DETERMAai/DETERMA-runtime-authority-public/issues/new?template=scan-my-repo.yml">Scan my repo</a>
+<a class="btn secondary" href="../../REQUEST_PRIVATE_REVIEW.md">Request private review</a>
+<a class="btn secondary" href="../../data/approval-continuity-benchmark-v3-200.json">Download public dataset</a>
+</div>
+</section>
+
+<section>
+<h2>Methodology</h2>
+<p>Ten preselected agentic repositories; 20 most recently updated PR histories with an approved review per repository; search window <code>updated:&gt;=2026-01-01</code>; latest retrievable APPROVED review bound to a commit ID; compare that exact commit ID with the PR final/current head SHA.</p>
+<p><strong>Statistical boundary:</strong> purposive benchmark corpus, not a random population sample. Percentages describe this corpus only.</p>
+</section>
+</main>
+<script>
+const DATA='../../data/approval-continuity-benchmark-v3-200.json';
+let rows=[];
+function render(){
+ const q=document.getElementById('q').value.toLowerCase();
+ const status=document.getElementById('status').value;
+ const actor=document.getElementById('actor').value;
+ const filtered=rows.filter(x=>{
+   const hay=(x.repository+' #'+x.pull_request_number+' '+(x.pull_request_title||'')).toLowerCase();
+   const changed=x.head_changed_after_latest_approval===true;
+   return hay.includes(q)
+    && (status==='all'||(status==='changed'&&changed)||(status==='same'&&!changed))
+    && (actor==='all'||x.approval.actor_class===actor);
+ });
+ document.getElementById('cases').innerHTML=filtered.map(x=>{
+   const changed=x.head_changed_after_latest_approval===true;
+   return '<div class="case"><div class="caseTop"><div><div class="repo">'+x.repository+' <a href="'+x.pull_request_url+'">#'+x.pull_request_number+'</a></div><div>'+escapeHtml(x.pull_request_title||'')+'</div></div><span class="pill '+(changed?'changed':'same')+'">'+(changed?'HEAD CHANGED':'HEAD UNCHANGED')+'</span></div><p><small>Approval actor: '+x.approval.actor_class+' • '+escapeHtml(x.approval.actor||'unknown')+'</small></p><p><small>Approved commit</small><br><code>'+x.approval.commit_id+'</code></p><p><small>Final/current head</small><br><code>'+x.final_head+'</code></p></div>';
+ }).join('') || '<div class="card">No matching cases.</div>';
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+fetch(DATA).then(r=>r.json()).then(d=>{rows=d.cases||[];render()}).catch(()=>{document.getElementById('cases').innerHTML='<div class="card">Dataset failed to load.</div>'});
+['q','status','actor'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+</script>
+</body>
+</html>
