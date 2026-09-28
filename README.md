@@ -132,11 +132,14 @@ proposal
 
 **Live benchmark:** https://determaai.github.io/DETERMA-runtime-authority-public/docs/benchmark/
 
-DETERMA analyzed 200 independently inspectable GitHub PR approval histories across 10 preselected agentic repositories. In this benchmark corpus, 30 histories (15%) ended with a final/current PR head different from the exact commit bound to the latest captured approval.
+DETERMA analyzed 200 independently inspectable GitHub PR approval histories across 10 preselected repositories for agentic / AI-agent projects. In this benchmark corpus, 30 histories (15%) had a captured final/current PR head SHA different from the exact commit ID bound to the latest captured approval.
 
-Interpretation: HEAD_CHANGED_AFTER_LATEST_APPROVAL → REVALIDATE_EXACT_HEAD_BEFORE_EXECUTION.
+V4 enriches those 30 mismatches: 29 have a different Git tree, while 1 has the same tree despite a different commit ID. The enrichment also records commit-graph relation, file-level compare metadata, the current API state of the captured review object, and a current point-in-time GitHub Rules API snapshot where observable.
 
-This is an approval-continuity signal, not a vulnerability or population-wide prevalence claim.
+This remains an approval-continuity benchmark, not a vulnerability, policy-bypass, material-risk, DETERMA-effectiveness, or population-wide prevalence claim.
+
+- [V4 methodology](docs/benchmark/methodology-v4.md)
+- [V4 enriched 30-case dataset](data/approval-continuity-benchmark-v4-enriched-30.json)
 
 ## Public Demo
 
